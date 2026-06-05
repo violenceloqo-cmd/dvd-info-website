@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DVD Bouncer — Pump.fun Live Buyback</title>
+  <meta name="description" content="Every corner hit triggers a 1 SOL Pump.fun buyback. Watch the real DVD bounce live." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050505;
+      --surface: #0a0a0a;
+      --surface-2: #111;
+      --text: rgba(255, 255, 255, 0.88);
+      --muted: rgba(255, 255, 255, 0.38);
+      --accent: #00ffff;
+      --green: #39ff14;
+      --radius: 12px;
+      --neon: #ff00ff;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.25rem 3rem;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 255, 255, 0.06), transparent),
+        var(--bg);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    header {
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid rgba(57, 255, 20, 0.35);
+      background: rgba(57, 255, 20, 0.06);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 32rem;
+      margin: 0 auto;
+    }
+
+    /* Bounce arena */
+    .arena-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      border-radius: var(--radius);
+      transition: transform 0.2s ease;
+    }
+
+    .arena-link:hover {
+      transform: translateY(-2px);
+    }
+
+    .arena-link:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .arena {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      min-height: 220px;
+      max-height: 420px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 2px solid var(--neon);
+      box-shadow:
+        0 0 20px color-mix(in srgb, var(--neon) 28%, transparent),
+        0 0 60px color-mix(in srgb, var(--neon) 12%, transparent);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .arena.flash {
+      animation: corner-flash 0.35s ease;
+    }
+
+    @keyframes corner-flash {
+      0%, 100% { background: var(--surface); }
+      40% { background: rgba(255, 255, 255, 0.08); }
+    }
+
+    .arena-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 5;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+
+    .arena-center p {
+      font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+      text-align: center;
+      opacity: 0.35;
+      letter-spacing: 0.04em;
+      line-height: 1.5;
+      transition: color 0.15s ease;
+    }
+
+    .arena-center .live-hint {
+      margin-top: 0.25rem;
+      font-size: clamp(0.7rem, 2.8vw, 0.85rem);
+      opacity: 0.55;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .arena-link:hover .live-hint {
+      opacity: 0.9;
+    }
+
+    .dvd {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      will-change: transform;
+    }
+
+    .dvd svg {
+      display: block;
+      filter: drop-shadow(0 0 10px color-mix(in srgb, var(--neon) 60%, transparent));
+      transition: fill 0.12s ease;
+    }
+
+    /* Info grid */
+    .info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 520px) {
+      .info { grid-template-columns: 1fr; }
+    }
+
+    .info-card {
+      background: var(--surface-2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+    }
+
+    .info-card .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .info-card .value {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    .info-card .value.cyan { color: var(--accent); }
+
+    .info-card .desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      line-height: 1.5;
+    }
+
+    /* CTA */
+    .cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-live {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 48px;
+      padding: 0.85rem 2rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--green);
+      background: rgba(57, 255, 20, 0.08);
+      border: 1px solid rgba(57, 255, 20, 0.4);
+      border-radius: var(--radius);
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+    }
+
+    .btn-live:hover {
+      background: rgba(57, 255, 20, 0.16);
+      box-shadow: 0 0 24px rgba(57, 255, 20, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn-live:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    .btn-live svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+
+    .cta-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.1em;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="badge">Live on Pump.fun</span>
+      <h1>DVD Bouncer</h1>
+      <p class="tagline">
+        The classic screensaver — reimagined as a live on-chain buyback machine.
+        Every time the logo hits a corner, the bot buys the token.
+      </p>
+    </header>
+
+    <a
+      id="arena-link"
+      class="arena-link"
+      href="https://pump.fun/coin/YOUR_TOKEN_MINT"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Watch the real DVD bounce live on Pump.fun"
+    >
+      <div id="arena" class="arena">
+        <div class="arena-center">
+          <p>
+            EACH CORNER HIT = 1 SOL<br />
+            PUMP.FUN BUYBACK
+          </p>
+          <p class="live-hint">Click to watch live →</p>
+        </div>
+        <div id="dvd" class="dvd" aria-hidden="true">
+          <svg id="dvd-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1058.4 465.84" width="180" height="79" fill="#ff00ff">
+            <path d="m91.053 0-13.719 57.707 102.28 0.039063h24c65.747 0 105.91 26.44 94.746 73.4-12.147 51.133-69.613 73.4-130.67 73.4h-22.947l29.787-125.45h-102.27l-43.521 183.2h145.05c109.07 0 212.76-57.573 231.01-131.15 3.3467-13.507 2.8806-47.253-5.3594-67.359-0.21299-0.787-0.42594-1.4-1.1855-3-0.293-0.653-0.56012-3.6412 1.1465-4.2812 0.947-0.36 2.7069 1.4944 2.9336 2.041 0.853 2.24 1.5059 3.9062 1.5059 3.9062l92.293 260.6 234.97-265.21 99.535-0.089844h24c65.76 0 106.25 26.44 95.092 73.4-12.147 51.133-69.947 73.4-131 73.4h-22.959l29.799-125.47h-102.27l-43.533 183.21h145.07c109.05 0 213.48-57.4 231-131.15 17.52-73.75-59.107-131.15-168.69-131.15h-216.4s-57.319 67.88-67.959 80.693c-57.12 68.787-67.241 87.226-68.961 91.986 0.24-4.8-1.8138-23.412-26.174-92.959-6.48-18.52-27.359-79.721-27.359-79.721h-389.25zm408.77 324.16c-276.04 0-499.83 31.72-499.83 70.84s223.79 70.84 499.83 70.84c276.04 0 499.83-31.72 499.83-70.84s-223.79-70.84-499.83-70.84zm-18.094 48.627c63.04 0 114.13 10.573 114.13 23.613s-51.095 23.613-114.13 23.613c-63.027 0-114.13-10.573-114.13-23.613s51.106-23.613 114.13-23.613z"/>
+          </svg>
+        </div>
+      </div>
+    </a>
+
+    <div class="info">
+      <div class="info-card">
+        <div class="label">Buyback</div>
+        <div class="value">1 SOL</div>
+        <p class="desc">Automatic Pump.fun buy triggered on every corner hit.</p>
+      </div>
+      <div class="info-card">
+        <div class="label">Status</div>
+        <div class="value cyan">Live Stream</div>
+        <p class="desc">Watch the real DVD bounce and buybacks happen in real time.</p>
+      </div>
+    </div>
+
+    <div class="cta">
+      <a id="btn-live" class="btn-live" href="https://pump.fun/coin/YOUR_TOKEN_MINT" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Watch Live on Pump.fun
+      </a>
+      <p class="cta-note">
+        This page is a preview. The live stream runs on Pump.fun<br />
+        with real on-chain buybacks on every corner.
+      </p>
+    </div>
+
+    <footer>DVD BOUNCER · PUMP.FUN</footer>
+  </div>
+
+  <script>
+    // ── Edit this before deploying ──────────────────────────────────
+    const LIVE_URL = "https://pump.fun/coin/YOUR_TOKEN_MINT";
+    // ────────────────────────────────────────────────────────────────
+
+    document.getElementById("arena-link").href = LIVE_URL;
+    document.getElementById("btn-live").href = LIVE_URL;
+
+    const NEON_COLORS = [
+      "#ff00ff", "#00ffff", "#39ff14", "#ff3131", "#ffff00",
+      "#ff6ec7", "#00ff7f", "#7b68ee", "#ff4500", "#1e90ff",
+      "#ff1493", "#00fa9a",
+    ];
+
+    const SPEED = 2.35;
+    const CORNER_TOLERANCE = 8;
+    const MIN_ANGLE = Math.PI / 7;
+    const MAX_ANGLE = Math.PI / 2 - MIN_ANGLE;
+    const DEFLECT_RANGE = 0.25;
+    const LOGO_ASPECT = 465.84 / 1058.4;
+
+    const arena = document.getElementById("arena");
+    const dvd = document.getElementById("dvd");
+    const dvdSvg = document.getElementById("dvd-svg");
+
+    let color = NEON_COLORS[0];
+    let logoW = 180;
+    let logoH = logoW * LOGO_ASPECT;
+
+    let pos = { x: 40, y: 30 };
+    let vel = velocityFromAngle(SPEED);
+
+    function randomAngle() {
+      return MIN_ANGLE + Math.random() * (MAX_ANGLE - MIN_ANGLE);
+    }
+
+    function velocityFromAngle(speed) {
+      const angle = randomAngle();
+      const signX = Math.random() < 0.5 ? 1 : -1;
+      const signY = Math.random() < 0.5 ? 1 : -1;
+      return {
+        dx: Math.cos(angle) * speed * signX,
+        dy: Math.sin(angle) * speed * signY,
+      };
+    }
+
+    function deflect(dx, dy, speed) {
+      const currentAngle = Math.atan2(Math.abs(dy), Math.abs(dx));
+      const nudge = (Math.random() - 0.5) * DEFLECT_RANGE;
+      let newAngle = Math.max(MIN_ANGLE, Math.min(MAX_ANGLE, currentAngle + nudge));
+      return {
+        dx: Math.cos(newAngle) * speed * Math.sign(dx),
+        dy: Math.sin(newAngle) * speed * Math.sign(dy),
+      };
+    }
+
+    function randomNeon(current) {
+      let next;
+      do {
+        next = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
+      } while (next === current);
+      return next;
+    }
+
+    function setColor(c) {
+      color = c;
+      arena.style.borderColor = c;
+      arena.style.boxShadow = `0 0 20px ${c}44, 0 0 60px ${c}22`;
+      dvdSvg.setAttribute("fill", c);
+      dvdSvg.style.filter = `drop-shadow(0 0 10px ${c}99)`;
+      document.documentElement.style.setProperty("--neon", c);
+      arena.querySelector(".arena-center p").style.color = c;
+    }
+
+    function resizeLogo() {
+      const rect = arena.getBoundingClientRect();
+      logoW = Math.min(220, Math.max(120, rect.width * 0.32));
+      logoH = logoW * LOGO_ASPECT;
+      dvdSvg.setAttribute("width", logoW);
+      dvdSvg.setAttribute("height", logoH);
+    }
+
+    function flashCorner() {
+      arena.classList.remove("flash");
+      void arena.offsetWidth;
+      arena.classList.add("flash");
+    }
+
+    function tick() {
+      const rect = arena.getBoundingClientRect();
+      const maxX = rect.width - logoW;
+      const maxY = rect.height - logoH;
+
+      let { x, y } = pos;
+      let { dx, dy } = vel;
+
+      x += dx;
+      y += dy;
+
+      let hitWall = false;
+
+      if (x <= 0) {
+        x = 0;
+        dx = Math.abs(dx);
+        const d = deflect(dx, dy, SPEED);
+        dx = d.dx; dy = d.dy;
+        hitWall = true;
+      } else if (x >= maxX) {
+        x = maxX;
+        dx = -Math.abs(dx);
+        const d = deflect(dx, dy, SPEED);
+        dx = d.dx; dy = d.dy;
+        hitWall = true;
+      }
+
+      if (y <= 0) {
+        y = 0;
+        dy = Math.abs(dy);
+        const d = deflect(dx, dy, SPEED);
+        dx = d.dx; dy = d.dy;
+        hitWall = true;
+      } else if (y >= maxY) {
+        y = maxY;
+        dy = -Math.abs(dy);
+        const d = deflect(dx, dy, SPEED);
+        dx = d.dx; dy = d.dy;
+        hitWall = true;
+      }
+
+      const nearLeft = x <= CORNER_TOLERANCE;
+      const nearRight = x >= maxX - CORNER_TOLERANCE;
+      const nearTop = y <= CORNER_TOLERANCE;
+      const nearBottom = y >= maxY - CORNER_TOLERANCE;
+
+      const isCorner =
+        (nearLeft && nearTop) ||
+        (nearLeft && nearBottom) ||
+        (nearRight && nearTop) ||
+        (nearRight && nearBottom);
+
+      if (isCorner) flashCorner();
+      if (hitWall) setColor(randomNeon(color));
+
+      pos = { x, y };
+      vel = { dx, dy };
+      dvd.style.transform = `translate(${x}px, ${y}px)`;
+
+      requestAnimationFrame(tick);
+    }
+
+    setColor(color);
+    resizeLogo();
+    window.addEventListener("resize", resizeLogo);
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
